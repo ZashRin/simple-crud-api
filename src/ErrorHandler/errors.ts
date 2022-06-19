@@ -52,7 +52,7 @@ export class BadRequestError extends BaseError {
                 super(`${ERROR_MESSAGES.BAD_REQUEST}\nusername must be a string`, 400);
                 break;
             case 'age':
-                super(`${ERROR_MESSAGES.BAD_REQUEST}\nage must be a string`, 400);
+                super(`${ERROR_MESSAGES.BAD_REQUEST}\nage must be a number`, 400);
                 break;
             case 'hobbies':
                 super(`${ERROR_MESSAGES.BAD_REQUEST}\nhobbies must be an array`, 400);
