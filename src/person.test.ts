@@ -1,4 +1,5 @@
 import request from 'supertest';
+import { v4 } from 'uuid';
 import { createServer } from './services/server.service';
 
 const server = createServer();
@@ -106,5 +107,72 @@ describe('CRUD API TESTS', () => {
       expect(body instanceof Object).toBe(true);
     });
   });
-})
 
+  describe('Second scenario', () => {
+    /*
+    Сценарий 2
+    POST-запросом создается новый объект (ожидается созданный объект)
+    C помощью uuid генерируем случайный id
+    GET-запросом пытаемся получить созданный объект по случайному id (ожидается статус 404)
+    PUT-запросом пытаемся обновить созданный объект по случайному id (ожидается статус 404)
+    DELETE-запросом пытаемся удалить созданный объект по случайному id (ожидается статус 404)
+    DELETE-запросом удаляем созданный объект по его действительному id (ожидается статус 204)
+    */
+
+    const updateData = {
+      username: 'update name',
+      age: 100,
+      hobbies: ["update"]
+    }
+
+    const randomId = v4();
+
+    let realId: string;
+
+    it('should create person successfully', async () => {
+      const { body, statusCode } = await request(server)
+        .post(base)
+        .send(testUser);
+      expect(statusCode).toEqual(201);
+      expect(body.username).toEqual(testUser.username);
+      expect(body.age).toEqual(testUser.age);
+      expect(JSON.stringify(body.hobbies)).toEqual(
+        JSON.stringify(testUser.hobbies),
+      );
+      realId = body.id;
+    });
+
+    // GET-запросом пытаемся получить созданный объект по случайному id (ожидается статус 404)
+
+    it('get non existing person, should get 404 error', async () => {
+      const { body, statusCode } = await request(server)
+        .get(`${base}/${randomId}`);
+      expect(statusCode).toEqual(404);
+      expect(body instanceof Object).toBe(true);
+    });
+
+    // PUT-запросом пытаемся обновить созданный объект по случайному id (ожидается статус 404)
+
+    test('update non existing person, should get 404 error ', async () => {
+      const { body, statusCode } = await request(server)
+        .put(`${base}/${randomId}`)
+        .send(updateData);
+      expect(statusCode).toEqual(404);
+      expect(body instanceof Object).toBe(true);    
+    });
+
+    // DELETE-запросом пытаемся удалить созданный объект по случайному id (ожидается статус 404)
+
+    it('delete non existing person, should get 404 error', async () => {
+      const { statusCode } = await request(server).delete(`${base}/${randomId}`);
+      expect(statusCode).toEqual(404);
+    });
+
+    // DELETE-запросом удаляем созданный объект по его действительному id (ожидается статус 204)
+
+    it('delete existing person, should get 204 error', async () => {
+      const { statusCode } = await request(server).delete(`${base}/${realId}`);
+      expect(statusCode).toEqual(204);
+    });
+  });
+});
