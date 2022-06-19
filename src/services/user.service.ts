@@ -1,14 +1,15 @@
 import { v4, validate as validateUUID } from 'uuid';
+import { CrashDataBaseError, InvalidUUIDError, NotExistUserError } from '../ErrorHandler/errors';
 import { IUser } from '../models/user.model';
 import { IValidate } from '../User/validate';
 
 const users: IUser[] = []
 
 const searchUser = (id: string) => {
-    if (!validateUUID(id)) throw new Error();
+    if (!validateUUID(id)) throw new InvalidUUIDError(id);
     const correctUser = users.filter(user => user.id == id);
-    if (correctUser.length < 1) throw new Error();
-    if (correctUser.length > 1) throw new Error();
+    if (correctUser.length < 1) throw new NotExistUserError(id);
+    if (correctUser.length > 1) throw new CrashDataBaseError();
     if (correctUser.length === 1) return correctUser[0];
 }
 
