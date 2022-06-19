@@ -8,6 +8,14 @@ username — имя (string, required)
 age — возраст (number, required)
 hobbies — список хобби (array of strings or empty array, required)
 ```
+## Пример запроса body:
+```
+{
+    "username": "test name",
+    "age": 55,
+    "hobbies": ["programming","testing"]
+}
+```
 
 ## Установка приложения
 
