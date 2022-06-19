@@ -1,5 +1,6 @@
 import request from 'supertest';
 import { v4 } from 'uuid';
+import { IUser } from './models/user.model';
 import { createServer } from './services/server.service';
 
 const server = createServer();
@@ -13,7 +14,15 @@ const testUser = {
 };
 
 describe('CRUD API TESTS', () => {
+  /*
+  Сценарий 2
+  POST-запросом в цикле создаём 3 новых объекта (ожидается ответ, 
+    содержащий свежесозданный объект)
+  DELETE-запросом в цикле удаляем все созданные объекты по id (ожидается 
+    подтверждение успешного удаления)
+  */
   afterAll(() => server.close());
+
   describe('First scenario', () => {
     /*
     Сценарий 1
@@ -109,8 +118,52 @@ describe('CRUD API TESTS', () => {
   });
 
   describe('Second scenario', () => {
+    let usersArray: IUser[] = [];
+    const testData = [testUser, testUser, testUser];
+
+    // POST-запросом в цикле создаём 3 новых объекта (ожидается ответ, 
+    // содержащий свежесозданный объект)
+
+    it('should create 3 persons successfully', () => {
+      testData.forEach(async (item) => {
+        const { body, statusCode } = await request(server)
+          .post(base)
+          .send(item);
+        expect(statusCode).toEqual(201);
+        expect(body.username).toEqual(testUser.username);
+        expect(body.age).toEqual(testUser.age);
+        expect(JSON.stringify(body.hobbies)).toEqual(
+          JSON.stringify(testUser.hobbies),
+        );
+      });
+    });
+
+    // GET-запросом получаем все объекты (ожидается 3 объекта)
+
+    it('should return all created users (expect 3 objects)', async () => {
+      const { body, statusCode } = await request(server)
+        .get(base);
+      expect(statusCode).toEqual(200);
+      expect(Array.isArray(body)).toBe(true);
+      expect(body.length).toEqual(3);
+      usersArray = body;
+    });
+    
+    // DELETE-запросом в цикле удаляем все созданные объекты по id (ожидается 
+    // подтверждение успешного удаления)
+
+    it('should delete 3 persons successfully', async () => {
+      usersArray.forEach(async (user) => {
+        const { statusCode } = await request(server)
+        .delete(`${base}/${user.id}`)
+        expect(statusCode).toEqual(204);
+      });  
+    });
+  });
+
+  describe('Third scenario', () => {
     /*
-    Сценарий 2
+    Сценарий 3
     POST-запросом создается новый объект (ожидается созданный объект)
     C помощью uuid генерируем случайный id
     GET-запросом пытаемся получить созданный объект по случайному id (ожидается статус 404)
