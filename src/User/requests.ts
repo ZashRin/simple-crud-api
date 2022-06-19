@@ -1,3 +1,4 @@
+import { NotFoundError } from '../ErrorHandler/errors';
 import { HandleError } from '../ErrorHandler/handler';
 import { RouterCallbackFunction } from '../services/server.service';
 import { getUsers, searchUser, createUser as create, removeUser, updateUser as update } from '../services/user.service';
@@ -17,6 +18,7 @@ const getAllUsers: RouterCallbackFunction = async (req, res) => {
 };
 
 const createUser: RouterCallbackFunction = async (req, res) => {
+    if (req.url !== '/api/users/') throw new NotFoundError();
     let data = '';
     req.on('data', (chunk) => (data += chunk));
     req.on('end', async () => {
