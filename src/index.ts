@@ -1,4 +1,5 @@
 import http from 'http';
+import { BaseError, NotFoundError, ServerInternalError } from './ErrorHandler/errors';
 import { envConfig } from './services/config.service';
 import { MethodType } from './services/server.service';
 import { createUser, deleteUser, getAllUsers, getUserByID, updateUser } from './User/requests';
@@ -25,10 +26,17 @@ const server = http.createServer(async (req, res) => {
                 await SERVER_ROUTES[method](req, res)
             };
         } else {
-            throw new Error('NotFound');
+            throw new NotFoundError();
         }
     } catch (err) {
-        console.log(err);
+      if (err instanceof BaseError) {
+          res.statusCode = err.code;
+          res.end(err.message);
+      } else {
+          const { code, message } = new ServerInternalError();
+          res.statusCode = code;
+          res.end(message);
+      }
     }
 });
 
