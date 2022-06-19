@@ -18,7 +18,7 @@ const getAllUsers: RouterCallbackFunction = async (req, res) => {
 };
 
 const createUser: RouterCallbackFunction = async (req, res) => {
-    if (req.url !== '/api/users/') throw new NotFoundError();
+    if (req.url !== '/api/users') throw new NotFoundError();
     let data = '';
     req.on('data', (chunk) => (data += chunk));
     req.on('end', async () => {
